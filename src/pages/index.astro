@@ -1,11 +1,120 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const notes: CollectionEntry<"notes">[] = await getCollection("notes");
+
+const sortedNotes = notes.sort((a, b) =>
+  (b.data.date || "").localeCompare(a.data.date || "")
+);
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌱 My Digital Garden</title>
+    <style>
+      /* Global font & body */
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        background-color: #f5f3ef; /* soft beige background */
+        color: #1b1b1b;
+        margin: 0;
+        padding: 40px 20px;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      h1 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        color: #2e7d32; /* forest green */
+      }
+
+      p.intro {
+        font-size: 1.2rem;
+        color: #555;
+        margin-bottom: 2rem;
+      }
+
+      /* Notes grid */
+      .notes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .note-card {
+        background: #ffffff;
+        border-left: 4px solid #81c784; /* green accent */
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .note-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      }
+
+      .note-card a {
+        font-size: 1.2rem;
+        color: #2e7d32;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .note-card a:hover {
+        text-decoration: underline;
+      }
+
+      .note-meta {
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: #777;
+      }
+
+      /* Optional: tag styles */
+      .tags {
+        margin-top: 6px;
+      }
+      .tag {
+        display: inline-block;
+        background-color: #c8e6c9;
+        color: #2e7d32;
+        font-size: 0.75rem;
+        padding: 2px 6px;
+        margin-right: 4px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>🌱 My Digital Garden</h1>
+    <p class="intro">Welcome! Explore my notes, thoughts, and experiments.</p>
+
+    <div class="notes-grid">
+      {sortedNotes.map(note => (
+        <div class="note-card">
+          <a href={`/notes/${note.slug}/`}>
+            {note.data.title || "Untitled Note"}
+          </a>
+          <div class="note-meta">
+            {note.data.date ? `${note.data.date} — ` : ""}
+            {note.data.description || ""}
+          </div>
+          {note.data.tags && note.data.tags.length > 0 && (
+            <div class="tags">
+              {note.data.tags.map(tag => (
+                <span class="tag">{tag}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </body>
+</html>

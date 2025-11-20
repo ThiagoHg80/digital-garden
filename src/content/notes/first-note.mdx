@@ -1,0 +1,24 @@
+---
+title: "My First Note"
+date: "2025-01-01"
+description: "A small test note"
+tags: ["astro", "mdx"]
+---
+
+import Playground from '../../components/Playground.jsx';
+
+# My interactive note
+
+<Playground>
+{`
+const el = document.getElementById("root");
+let t = 0;
+function loop(){
+  t += 0.02;
+  el.innerHTML = "<h1>"+ Math.sin(t).toFixed(2) +"</h1>";
+  requestAnimationFrame(loop);
+}
+loop();
+`}
+</Playground>
+

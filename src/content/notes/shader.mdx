@@ -1,0 +1,75 @@
+---
+title: "My First EM Wave Shader"
+date: "2025-11-20"
+description: "Interactive EM wave shader simulation"
+tags: ["shader", "webgl", "interactive"]
+---
+
+import ShaderPlayground from '../../components/ShaderPlayground.jsx';
+
+# EM Wave Simulation
+
+This is an interactive electromagnetic wave simulation using WebGL in your browser.  
+
+<ShaderPlayground client:load
+code={`
+precision mediump float;
+uniform vec2 iResolution;
+uniform float iTime;
+
+const float v = 0.05;
+const float f = 1.0;
+const float w = 2.0*3.1415926*f;
+const float k = w/v;
+const float lambda = v/f;
+const float d = lambda/2.0;
+
+struct EMW {
+    vec2 origin;
+    float w;
+    float k;
+    float p;
+};
+
+const int count = 32;
+EMW W[count];
+
+float sdWave(EMW w, vec2 p, float t) {
+    return cos(w.w*t - w.k*length(p - w.origin) + w.p);
+}
+
+float radiation(EMW w, vec2 p) {
+    vec2 delta = p - w.origin;
+    float rad = (2.0*3.1415926/length(delta))*cos(atan(delta.y, delta.x));
+    return rad;
+}
+
+float triangleWave(float x) {
+    return 0.8105694*(sin(3.1415926*x) - sin(3.0*3.1415926*x)/9.0 + sin(5.0*3.1415926*x)/25.0);
+}
+
+void main() {
+    vec2 uv = gl_FragCoord.xy / iResolution.xy; // [0,1]
+    uv = uv * 2.0 - 1.0;                        // [-1,1]
+    uv.x *= iResolution.x / iResolution.y;      // correct aspect ratio
+    float zoom = 1.5;
+    uv *= zoom;
+
+    vec3 col = vec3(0.3,0.3,0.3);
+    vec3 grad = vec3(0.02,0.01,0.01);
+
+    float theta = triangleWave(iTime / 4.0) * (3.1415926 / 4.0);
+    float psi = 2.0 * 3.1415926 * d * sin(theta) / lambda;
+
+    float wave = 0.0;
+    for(int i = 0; i < count; i++){
+        W[i] = EMW(vec2(-1.75*zoom, (float(i) - float(count)/2.0)*d), w, k, float(i)*psi);
+        wave += radiation(W[i], uv) * sdWave(W[i], uv, iTime);
+    }
+    wave = (32.0/float(count)) * wave;
+    col += grad * wave;
+
+    gl_FragColor = vec4(col,1.0);
+}
+`}
+/>
