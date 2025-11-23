@@ -11,7 +11,7 @@ export default defineConfig({
       remarkPlugins: [remarkMath],
       rehypePlugins: [rehypeKatex],
     }), react()],
-    site: 'https://username.github.io',
+    site: 'https://thiagohg80.github.io',
     build: {
       assets: '_astro'
     },
