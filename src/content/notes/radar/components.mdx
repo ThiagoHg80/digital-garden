@@ -1,0 +1,77 @@
+---
+title: "Radar-Components"
+date: "2025-11-23"
+description: ""
+tags: []
+---
+
+import SmithChart from '../../../components/SmithChart.jsx';
+
+# Stability Circle
+
+For a 2-port network with S-parameter matrix:
+
+$$
+S = 
+\begin{bmatrix}
+S_{11} & S_{12} \\
+S_{21} & S_{22}
+\end{bmatrix}
+$$
+
+The **input** and **output stability circles** are defined by:
+
+### Midpoint
+
+$$
+C_i = \frac{S_{ii}^\ast - S_{jj} \,(\det S)^\ast}{|S_{ii}|^2 - |\det S|^2}
+$$
+
+### Radius
+
+$$
+R_i = \frac{s_{21}s_{12}}{|s_{ii}|^2 - |\det S|^2}
+$$
+
+Where $i,j \in \{1,2\}$ and $i \neq j$.
+
+---
+
+# Stability Factor (Rollett's \(k\))
+
+$$
+k = \frac{1 - |S_{11}|^2 - |S_{22}|^2 + |\det S|^2}{2 |S_{12}| |S_{21}|}
+$$
+
+---
+
+# Given S-Parameter Matrix
+
+$$
+\begin{aligned}
+S_{11} &= 0.4389 - 0.7789j \\
+S_{12} &= 0.0093 + 0.0177j \\
+S_{21} &= -1.7277 + 2.6004j \\
+S_{22} &= 0.6921 - 0.3618j
+\end{aligned}
+$$
+
+The stability circles calculated are shown in the smith chart below:
+
+<SmithChart
+  client:load
+  width={400}
+  height={400}
+  scale={0.75}
+  stroke_width={0.015}
+  config={{
+    points: [
+        { type:'z', re:0.4156, im:1.0529, color:'pink', size: 0.025},
+        { type:'z', re:0.9352, im:0.9926, color:'purple', size: 0.025}
+    ],
+    circles: [
+        { type:'z', re:0.4156, im:1.0529, radius:0.1987, color:'pink', stroke_width: 0.03},
+        { type:'z', re:0.9352, im:0.9926, radius:0.5006, color:'purple', stroke_width: 0.03}
+    ],
+  }}
+/>

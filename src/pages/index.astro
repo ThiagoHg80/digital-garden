@@ -1,120 +1,118 @@
 ---
 import { getCollection, type CollectionEntry } from 'astro:content';
-
+import Sticker from '../components/Sticker.jsx';
 const notes: CollectionEntry<"notes">[] = await getCollection("notes");
-
 const sortedNotes = notes.sort((a, b) =>
   (b.data.date || "").localeCompare(a.data.date || "")
 );
----
+const colors = ['yellow', 'pink', 'blue', 'green', 'purple', 'orange'];
 
+// Generate random values for each note (will be different on each build)
+const notePositions = sortedNotes.slice(0, 15).map((note, index) => {
+  const col = index % 3;
+  const row = Math.floor(index / 3);
+  const baseX = 5 + (row * 5);
+  const baseY = 5 + (col * 5);
+  
+  return {
+    x: baseX + (Math.random() - 0.5) * 3,
+    y: baseY + (Math.random() - 0.5) * 3,
+    size: 9 + Math.random() * 2,
+    rotation: -5 + Math.random() * 10
+  };
+});
+---
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🌱 My Digital Garden</title>
+    <title>🌱 THG</title>
     <style>
-      /* Global font & body */
       body {
-        font-family: 'Inter', system-ui, sans-serif;
-        background-color: #f5f3ef; /* soft beige background */
-        color: #1b1b1b;
+        font-family: 'Comic Sans MS', 'Marker Felt', cursive;
+        background: linear-gradient(135deg, #e0ecd4 0%, #bfcabc 100%);
         margin: 0;
-        padding: 40px 20px;
-        max-width: 1000px;
-        margin-left: auto;
-        margin-right: auto;
+        padding: 0;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+      }
+      
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+          radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+          radial-gradient(circle at 80% 70%, rgba(139, 69, 19, 0.03) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
       }
 
+      /* Grain/noise effect overlay */
+      body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1.0'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.4;
+      }
       h1 {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
-        color: #2e7d32; /* forest green */
+        text-align: left;
+        font-size: 1rem;
+        color: #2d3436;
+        text-shadow: 3px 3px 0px rgba(255,255,255,0.3);
+        padding: 20px 20px 20px;
+        margin: 0;
+        position: relative;
+        z-index: 1;
       }
-
-      p.intro {
-        font-size: 1.2rem;
-        color: #555;
-        margin-bottom: 2rem;
-      }
-
-      /* Notes grid */
-      .notes-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-      }
-
-      .note-card {
-        background: #ffffff;
-        border-left: 4px solid #81c784; /* green accent */
-        padding: 16px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .note-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      }
-
-      .note-card a {
-        font-size: 1.2rem;
-        color: #2e7d32;
-        font-weight: 600;
-        text-decoration: none;
-      }
-
-      .note-card a:hover {
-        text-decoration: underline;
-      }
-
-      .note-meta {
-        margin-top: 8px;
-        font-size: 0.9rem;
-        color: #777;
-      }
-
-      /* Optional: tag styles */
-      .tags {
-        margin-top: 6px;
-      }
-      .tag {
-        display: inline-block;
-        background-color: #c8e6c9;
-        color: #2e7d32;
-        font-size: 0.75rem;
-        padding: 2px 6px;
-        margin-right: 4px;
-        border-radius: 4px;
+      #sticker-container {
+        position: relative;
+        width: 100%;
+        min-height: calc(100vh - 140px);
+        padding: 20px;
+        box-sizing: border-box;
       }
     </style>
   </head>
-
   <body>
-    <h1>🌱 My Digital Garden</h1>
-    <p class="intro">Welcome! Explore my notes, thoughts, and experiments.</p>
-
-    <div class="notes-grid">
-      {sortedNotes.map(note => (
-        <div class="note-card">
-          <a href={`/notes/${note.slug}/`}>
-            {note.data.title || "Untitled Note"}
-          </a>
-          <div class="note-meta">
-            {note.data.date ? `${note.data.date} — ` : ""}
-            {note.data.description || ""}
-          </div>
-          {note.data.tags && note.data.tags.length > 0 && (
-            <div class="tags">
-              {note.data.tags.map(tag => (
-                <span class="tag">{tag}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+    <h1>I'll organize this later</h1>
+    <div id="sticker-container">
+      <!-- Post-it notes from blog posts -->
+      {sortedNotes.slice(0, 15).map((note, index) => {
+        // Arrange notes in a scattered grid pattern
+        const col = index % 3;
+        const row = Math.floor(index / 3);
+        const baseX = 5 + (row * 5);
+        const baseY = 5 + (col * 5);
+        const offsetX = (Math.random() - 0.5) * 3;
+        const offsetY = (Math.random() - 0.5) * 3;
+        return (
+          <Sticker 
+            client:only="react"
+            type="postit"
+            x={baseX + offsetX}
+            y={baseY + offsetY}
+            size={6 + Math.random() * 1.5}
+            rotation={-5 + Math.random() * 10}
+            href={`/notes/${note.slug}/`}
+            title={note.data.title || "Untitled"}
+            description={note.data.description || ""}
+            date={note.data.date}
+            tags={note.data.tags}
+            color={colors[index % colors.length]}
+          />
+        );
+      })}
     </div>
   </body>
 </html>
